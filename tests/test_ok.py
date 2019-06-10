@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+from falcon.testing.client import TestClient as Client
 import pytest
 
 Case = namedtuple('Case', ['method', 'url', 'data_or_params'])
@@ -42,3 +43,12 @@ def test_decorator_validation_ok(method, url, data_or_params, decorator_app):
 @pytest.mark.parametrize('method, url, data_or_params', CASES)
 def test_middleware_validation_ok(method, url, data_or_params, middleware_app):
     getattr(middleware_app, method)(url, data_or_params)
+
+
+@pytest.mark.parametrize('method, url, data_or_params', CASES)
+def test_middleware_falcon_test_client_ok(method, url, data_or_params, middleware_falcon_app):
+    client = Client(middleware_falcon_app)
+    if method == 'get':
+        client.simulate_get(url, params=data_or_params)
+    elif method == 'post_json':
+        client.simulate_post(url, json=data_or_params)

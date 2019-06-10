@@ -43,6 +43,16 @@ class _ElementResource(object):
         assert test_id == 7
 
 
+def make_test_app(validator):
+    api = falcon.API(middleware=validator)
+    api.add_route('/tests', _CollectionResource())
+    api.add_route('/tests/{test_id}', _ElementResource())
+    # add entry point not in the specs
+    api.add_route('/backdoor', _CollectionResource())
+    return api
+
+
+
 @pytest.fixture(params=VALIDATORS)
 def decorator_app(request):
     validator = request.param
@@ -63,10 +73,10 @@ def decorator_app(request):
 
 @pytest.fixture(params=VALIDATORS)
 def middleware_app(request):
-    validator = request.param
-    api = falcon.API(middleware=validator)
-    api.add_route('/tests', _CollectionResource())
-    api.add_route('/tests/{test_id}', _ElementResource())
-    # add entry point not in the specs
-    api.add_route('/backdoor', _CollectionResource())
+    api = make_test_app(request.param)
     return webtest.TestApp(api)
+
+
+@pytest.fixture(params=VALIDATORS)
+def middleware_falcon_app(request):
+    return make_test_app(request.param)
