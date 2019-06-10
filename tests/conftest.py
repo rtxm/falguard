@@ -52,7 +52,6 @@ def make_test_app(validator):
     return api
 
 
-
 @pytest.fixture(params=VALIDATORS)
 def decorator_app(request):
     validator = request.param
